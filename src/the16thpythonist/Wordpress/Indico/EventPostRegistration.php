@@ -24,6 +24,8 @@ class EventPostRegistration implements PostRegistration
 {
     public $post_type;
 
+    public $meta_boxes = array();
+
     const LABEL = 'Event';
     const ICON = 'dashicons-groups';
     const TAXONOMIES = array(
@@ -67,6 +69,10 @@ class EventPostRegistration implements PostRegistration
         return $this->post_type;
     }
 
+    // *********************************
+    // THE REGISTRATION OF THE POST TYPE
+    // *********************************
+
     /**
      * Actually hooks in the functions, which do the registration into the init hook
      *
@@ -82,6 +88,27 @@ class EventPostRegistration implements PostRegistration
         add_action('init', array($this, 'registerTaxonomies'));
 
         add_action('save_post', array($this, 'savePost'));
+
+        // The metaboxes are registered by creating their own Metabox objects, which handle the registration, because
+        // that is a lengthy process and none of the the concern of this class.
+        // Thus this method does not need to be hooked in to anything, but rather executed right away.
+        $this->registerMetaboxes();
+    }
+
+    /**
+     * Registers all the meta boxes, that are needed for the "Event" post type. The metaboxes will appear in the
+     * "edit post" screen for a "Event" post.
+     *
+     * CHANGELOG
+     *
+     * Added 04.01.2019
+     */
+    public function registerMetaboxes() {
+        // This metabox will be used to instantly create a single new event by directly fetching it from an Indico site
+        // The actual instance of the Metabox object will be stored in an array, as it may be needed by other code
+        $fetch_metabox = new EventPostFetchMetabox();
+        $fetch_metabox->register();
+        $this->meta_boxes[] = $fetch_metabox;
     }
 
     /**
@@ -142,6 +169,10 @@ class EventPostRegistration implements PostRegistration
             }
         }
     }
+
+    // *************************************
+    // THE SAVING PROCESS FOR THIS POST TYPE
+    // *************************************
 
     /**
      * This function gets hooked in, so it is called every time a new post is being saved into the database, but it
