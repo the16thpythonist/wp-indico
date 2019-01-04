@@ -16,5 +16,10 @@
   "require": {
     "the16thpythonist/indico-api": "dev-master",
     "the16thpythonist/wp-cpt-lib": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "the16thpythonist\\Wordpress\\Indico\\": "src/the16thpythonist/Wordpress/Indico"
+    }
   }
 }
