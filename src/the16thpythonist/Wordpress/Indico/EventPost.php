@@ -131,7 +131,7 @@ class EventPost extends PostPost
      * @param string $post_type
      * @param string $class
      */
-    public static function register(string $post_type, string $class='EventPostRegistration')
+    public static function register(string $post_type, string $class=EventPostRegistration::class)
     {
         // Saving the exact string name of the post type in a static attribute so it can ve accessed by others as well
         // without actually having access to the object, only needing the namespace of the class.
