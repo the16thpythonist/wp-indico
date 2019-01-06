@@ -167,6 +167,48 @@ class EventPost extends PostPost
     // ***************************************
 
     /**
+     * Retruns an array of all the EventPost objects for every post of the type "event"
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @return array
+     */
+    public static function getAll() {
+        $posts = self::getAllPosts();
+
+        $event_posts = array();
+        foreach ($posts as $post) {
+            // Creating a new wrapper object from the ID of the post and then adding it to the new array.
+            $event_posts[] = new EventPost($post->ID);
+        }
+        return $event_posts;
+    }
+
+    /**
+     * Returns an array of all the WP_Post objects for posts of the custom type "event"
+     * ! They are not wrapped yet. Those will just be the normal wordpress post objects
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @return array
+     */
+    public static function getAllPosts() {
+        $args = array(
+            'post_type'         => self::$POST_TYPE,
+            'post_status'       => 'publish',
+            'posts_per_page'    => -1
+        );
+        $query = new \WP_Query($args);
+        $posts = $query->get_posts();
+
+        return $posts;
+    }
+
+    /**
      * Inserts a new event post into the database.
      * Can have the following arguments:
      * - title:         The title of the event
@@ -190,6 +232,9 @@ class EventPost extends PostPost
     public static function insert($args) {
         $args = array_replace(self::DEFAULT_INSERT, $args);
 
+        // This method will add additional derived arguments to the array, which were computed from the given ones.
+        $args = self::extendPostArgs($args);
+
         // Creating the array, which has to be passed to wordpress to actually create a post from the arguments about
         // the event. Some values are mapped as meta values but some have to be inserted as taxonomy terms separately
         $postarr = self::createPostarr($args);
@@ -197,6 +242,7 @@ class EventPost extends PostPost
 
         $post_id = wp_insert_post($postarr);
 
+        // This function will insert the values of the arguments that were mapped as taxonomies
         self::setEventTerms($post_id, $args);
 
         return $post_id;
@@ -227,13 +273,40 @@ class EventPost extends PostPost
      */
     public static function update($post_id, $args) {
 
+        // This method computes additional derived arguments from the ones given and adds them to the arguments array
+        $args = self::extendPostArgs($args);
+
+        // Computes the actual array, that has to be passed to the wordpress function to actually create a new post
+        // from the array, that just specifies top level attributes of the event.
         $postarr = self::createPostarr($args);
         $postarr['ID'] = $post_id;
+
         echo wp_update_post($postarr);
 
+        // This function will insert the values of the arguments that were mapped as taxonomies
         self::setEventTerms($post_id, $args);
 
         return $post_id;
+    }
+
+    /**
+     * This function extends the arguments array passed to insert or update a post with the additional values, which
+     * need to be computed/derived from the given ones.
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function extendPostArgs(array $args) {
+        // The site URL is not a native argument, that can be passed. It is a derived one, which is computed directly
+        // from the URL of the specific event.
+        if (array_key_exists('url', $args)) {
+            $args['site_url'] = self::siteUrlFromUrl($args['url']);
+        }
+        return $args;
     }
 
     /**
@@ -257,7 +330,8 @@ class EventPost extends PostPost
             'published'     => 'post_date',
             'indico_id'     => 'meta_input/indico_id',
             'starting'      => 'meta_input/start_date',
-            'url'           => 'meta_input/url'
+            'url'           => 'meta_input/url',
+            'site_url'      => 'meta_input/site_url'
         );
         $postarr = PostUtil::subArrayMapping($mapping, $args);
         $postarr['post_status'] = 'publish';
@@ -313,5 +387,29 @@ class EventPost extends PostPost
 
         $event_url = $site_url . '/event/' . $indico_id . '/';
         return $event_url;
+    }
+
+    /**
+     * Given the url of a specific event, this function will return the URL of the indico sites main page
+     *
+     * NOTE:
+     * This implementation may be replaced using regular expressions?
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param string $url   The url of the event
+     * @param int $depth    DEFAULT is 3.
+     * @return string
+     */
+    public static function siteUrlFromUrl(string $url, int $depth=3) {
+        // Every specific URL for a single event on an indico site is built in the same structure: It is the base url
+        // followed by /event/{actual_id}. We will be extracting the site url by just cutting of after the second last
+        // slash (/) has occurred.
+        $url_parts = explode('/', $url);
+        $url_parts_sliced = array_slice($url_parts, 0, count($url_parts) - $depth, FALSE);
+        $site_url = implode('/', $url_parts_sliced);
+        return $site_url;
     }
 }

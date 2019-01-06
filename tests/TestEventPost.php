@@ -31,15 +31,13 @@ class TestEventPost extends TestCase
         $this->assertEquals(1, $result['hello']['test']);
     }
 
-    public function testEventPostPostarrCreationIdeaWorks() {
-        $args = array(
-            'title'     => 'test'
-        );
-        $postarr = EventPost::createPostarr($args);
-        $this->assertTrue(array_key_exists('post_title', $postarr));
+    public function testSiteUrlExtractionIsWorking() {
+        $url = 'https://indico.desy.de/indico/event/21067/';
+        $site_url_expected = 'https://indico.desy.de/indico';
 
-        $args = array();
-        $postarr = EventPost::createPostarr($args);
-        $this->assertFalse(array_key_exists('post_title', $postarr));
+        $site_url = EventPost::siteUrlFromUrl($url);
+        $this->assertEquals($site_url_expected, $site_url);
     }
+
+
 }
