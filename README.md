@@ -20,3 +20,6 @@ to the wordpress system.
 within the "event" post type edit screen, with which a event can be directly created by fetching 
 it from an indico site directly.
 - Added "event-post-fetch-metabox.js" Script, which will be loaded and used by the fetch metabox
+- Added some simple test cases for utility functions
+- Added the "KnownIndicoSites" class, which acts as a container and access point for the info about 
+all observed indico sites and their urls, api keys etc.

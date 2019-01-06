@@ -8,6 +8,7 @@
 
 namespace the16thpythonist\Wordpress\Indico;
 
+use the16thpythonist\Indico\IndicoApi;
 use the16thpythonist\Wordpress\Base\Metabox;
 
 /**
@@ -41,8 +42,42 @@ class EventPostFetchMetabox implements Metabox
      */
     public function display($post)
     {
-        echo "Test";
+        // An array containing arrays, which define the most important info about all the observed indico sites, from
+        // which an event can possibly be fetched.
+        $sites = KnownIndicoSites::getAllSites();
+        ?>
+        <div id="indico-fetch-event-container">
+            <p>
+                Do you want to load a new Event directly from Indico? <br>
+                Then simply choose which indico site to use and simply import the event by its indico ID:
+            </p>
+
+            <select id="indico-fetch-selection" title="indico-fetch-selection">
+                <?php foreach ($sites as $site): ?>
+                    <option value="<?php echo $site['name']; ?>"><?php echo $site['url']; ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <input type="text" id="fetch-event-id" name="fetch-event-id" value="paste indico event ID here">
+
+            <button id="fetch-indico-event">
+                Load Event!
+            </button>
+        </div>
+
+        <script>
+            // Here we need to pass the script the ID of the wordpress post on which this script is being executed,
+            // because the script is later going to need it to send it with an AJAX request.
+            var post_id = <?php global $post; echo $post->ID; ?>;
+
+            // Dynamically loading the actual script to be executed with the metabox
+            jQuery.getScript("<?php echo plugin_dir_url(__FILE__); ?>event-post-fetch-metabox.js", function () {
+                //
+            });
+        </script>
+        <?php
     }
+
 
     public function load($post)
     {
@@ -67,6 +102,10 @@ class EventPostFetchMetabox implements Metabox
     {
         // The metabox itself
         add_action('add_meta_boxes', array($this, 'registerMetabox'));
+
+        // This is the callback for the AJAX request, that gets invoked, when actually sending off the info about
+        // the event, that is supposed to be fetched.
+        add_action('wp_ajax_fetch_indico_event', array($this, 'ajaxFetchIndicoEvent'));
     }
 
     /**
@@ -80,7 +119,7 @@ class EventPostFetchMetabox implements Metabox
         add_meta_box(
             self::ID,
             self::TITLE,
-            array($this, 'load'),
+            array($this, 'display'),
             EventPost::$POST_TYPE,
             'normal',
             'high'
@@ -95,4 +134,22 @@ class EventPostFetchMetabox implements Metabox
     {
         // TODO: Implement save() method.
     }
+
+    // **************************************
+    // AJAX CALLBACKS REQUIRED BY THE METABOX
+    // **************************************
+    
+    public function ajaxFetchIndicoEvent() {
+
+
+        // Preventing an additional 0 to be appended to the response
+        wp_die();
+    }
+
+    public function getIndicoEvent(string $url, string $key, string $indico_id) {
+        $api = new IndicoApi($url, $key);
+        $event = $api->getEvent($indico_id);
+
+    }
+
 }
