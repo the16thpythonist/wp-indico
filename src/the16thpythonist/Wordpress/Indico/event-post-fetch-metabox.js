@@ -13,10 +13,11 @@ var fetch_button = jQuery('button#fetch-indico-event');
  * @param cb        The callback to be executed after successful ajax response. One parameter being the response string.
  */
 function fetchEvent(site_name, indico_id, cb) {
+    console.log(post_id);
     jQuery.ajax({
         url:        ajaxurl,
         type:       'GET',
-        timeout:    1000,
+        timeout:    60000,
         dataType:   'html',
         async:      true,
         data:       {
@@ -44,8 +45,8 @@ function fetchEvent(site_name, indico_id, cb) {
  * Added 05.01.2019
  */
 function getEventInfo() {
-    let indico_id = jQuery('select#indico-fetch-selection').attr('value');
-    let site_name = jQuery('input#fetch-event-id').attr('value');
+    let site_name = jQuery('select#indico-fetch-selection').attr('value');
+    let indico_id = jQuery('input#fetch-event-id').attr('value');
     return {
         indico_id: indico_id,
         site_name: site_name
@@ -58,9 +59,11 @@ fetch_button.on('click', function () {
    let indico_info = getEventInfo();
 
    fetchEvent(indico_info.site_name, indico_info.indico_id, function (response) {
-       // Nothing really has to be done on success.
+       // Reload the page, after the new info was sucessfully inserted
+       location.replace(post_url);
    });
 
+   
    // We return true, because we obviously want a page reload to be able to see all the new info that has been updated
    // to the post
    return false;

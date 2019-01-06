@@ -10,6 +10,8 @@ namespace the16thpythonist\Wordpress\Indico;
 
 use the16thpythonist\Indico\IndicoApi;
 use the16thpythonist\Wordpress\Base\Metabox;
+use the16thpythonist\Indico\Event;
+use the16thpythonist\Wordpress\Functions\PostUtil;
 
 /**
  * Class EventPostFetchMetabox
@@ -37,6 +39,11 @@ class EventPostFetchMetabox implements Metabox
      *
      * Added 04.01.2019
      *
+     * Changed 06.01.2019
+     * Added an additional global variable to the javascript, which contains the url to the edit page of exactly this
+     * post. It is being called after the new event has been successfully fetched and inserted to redirect to the edit
+     * page of that event.
+     *
      * @param \WP_Post $post
      * @return mixed|void
      */
@@ -45,11 +52,12 @@ class EventPostFetchMetabox implements Metabox
         // An array containing arrays, which define the most important info about all the observed indico sites, from
         // which an event can possibly be fetched.
         $sites = KnownIndicoSites::getAllSites();
+        global $post;
         ?>
         <div id="indico-fetch-event-container">
             <p>
-                Do you want to load a new Event directly from Indico? <br>
-                Then simply choose which indico site to use and simply import the event by its indico ID:
+                Do you want to load a new Event <strong>directly from Indico?</strong> <br>
+                Then simply <em>choose which indico site</em> to use and simply import the event by its <em>indico ID</em>:
             </p>
 
             <select id="indico-fetch-selection" title="indico-fetch-selection">
@@ -58,17 +66,18 @@ class EventPostFetchMetabox implements Metabox
                 <?php endforeach; ?>
             </select>
 
-            <input type="text" id="fetch-event-id" name="fetch-event-id" value="paste indico event ID here">
+            <input type="text" id="fetch-event-id" name="fetch-event-id" placeholder="paste indico event ID here">
 
-            <button id="fetch-indico-event">
-                Load Event!
+            <button id="fetch-indico-event" class="material-button-indico">
+                Load!
             </button>
         </div>
 
         <script>
             // Here we need to pass the script the ID of the wordpress post on which this script is being executed,
             // because the script is later going to need it to send it with an AJAX request.
-            var post_id = <?php global $post; echo $post->ID; ?>;
+            var post_id = <?php echo $post->ID; ?>;
+            var post_url = "<?php echo get_site_url() . '/wp-admin/post.php?post=' . $post->ID . "&action=edit"; ?>";
 
             // Dynamically loading the actual script to be executed with the metabox
             jQuery.getScript("<?php echo plugin_dir_url(__FILE__); ?>event-post-fetch-metabox.js", function () {
@@ -138,18 +147,85 @@ class EventPostFetchMetabox implements Metabox
     // **************************************
     // AJAX CALLBACKS REQUIRED BY THE METABOX
     // **************************************
-    
+
+    /**
+     * AJAX callback. Will get the event according to the specified indico id and site and then update the given post
+     * with that info
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     */
     public function ajaxFetchIndicoEvent() {
+        $params = array('post_id', 'indico_id', 'site');
+
+        if (!PostUtil::containsGETParameters($params)) {
+            wp_die();
+        }
+
+        $post_id = $_GET['post_id'];
+        $indico_id = $_GET['indico_id'];
+        $site = KnownIndicoSites::getSite($_GET['site']);
+
+        // Getting the event from the actual Indico site. This involves network requests
+        try {
+            $event = $this->getIndicoEvent($site['url'], $site['key'], $indico_id);
+            $this->updateEvent($post_id, $event);
+        } catch (\Error | \Exception $e) {
+            // echo var_export($event->data, TRUE);
+            echo $e->getMessage();
+        }
 
 
         // Preventing an additional 0 to be appended to the response
         wp_die();
     }
 
+    /**
+     * Will use the IndicoApi to request the event with the given indico ID from the indico site defined by the url,
+     * using the given api key
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param string $url
+     * @param string $key
+     * @param string $indico_id
+     * @return Event
+     */
     public function getIndicoEvent(string $url, string $key, string $indico_id) {
         $api = new IndicoApi($url, $key);
         $event = $api->getEvent($indico_id);
 
+        return $event;
+    }
+
+    /**
+     * Given the Event response object from the IndicoApi object and the wordpress post id it will update this post
+     * with the info from the given event.
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param string $post_id
+     * @param Event $event
+     */
+    public function updateEvent(string $post_id, Event $event) {
+        // Creating the arguments array for the insert operation
+        $args = array(
+                'title'         => $event->getTitle(),
+                'description'   => $event->getDescription(),
+                'published'     => $event->getModificationTime()->format('Y-m-d H:i:s'),
+                'starting'      => $event->getStartTime()->format('Y-m-d H:i:s'),
+                'indico_id'     => $event->getID(),
+                'url'           => $event->getURL(),
+                'creator'       => $event->getCreator(),
+                'location'      => $event->getLocation(),
+                'type'          => $event->getType(),
+        );
+        EventPost::update($post_id, $args);
     }
 
 }

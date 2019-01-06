@@ -1,0 +1,44 @@
+div#indico-fetch-event-container {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+}
+
+div#indico-fetch-event-container * {
+    margin-bottom: 10px;
+}
+
+div#event-post-fetch-metabox .hndle span {
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-style: solid;
+    border-color: #3ECF8E;
+}
+
+/* The execute button gets a more modern design and color */
+.material-button-indico {
+    /* center the button within the container */
+    align-self: center;
+
+    /* Making a material design button */
+    border-style: solid;
+    border-width: 0;
+    border-bottom-width: 3px;
+    border-bottom-color: #28A46C;
+
+    /* Scaling the button up, so it can be seen better */
+    font-size: large;
+    width: 100px !important;
+    height: 30px !important;
+
+    background-color: #3ECF8E;
+    color: white;
+}
+
+.material-button-indico:active {
+    /* Button press animation */
+    background-color: #28A46C;
+    border-bottom-width: 0px;
+    border-top-width: 3px;
+    border-top-color: rgba(0,0,0,0);
+}

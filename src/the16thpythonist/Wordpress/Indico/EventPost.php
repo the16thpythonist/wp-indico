@@ -192,38 +192,77 @@ class EventPost extends PostPost
 
         // Creating the array, which has to be passed to wordpress to actually create a post from the arguments about
         // the event. Some values are mapped as meta values but some have to be inserted as taxonomy terms separately
-        $postarr = array(
-            'post_type'         => self::$POST_TYPE,
-            'post_title'        => $args['title'],
-            'post_content'      => $args['description'],
-            'post_status'       => 'publish',
-            'post_date'         => $args['published'],
-            'meta_input'        => array(
-                'indico_id'         => $args['indico_id'],
-                'start_date'        => $args['starting'],
-                'url'               => $args['url']
-            )
-        );
+        $postarr = self::createPostarr($args);
+        $postarr['post_type'] = self::$POST_TYPE;
 
         $post_id = wp_insert_post($postarr);
 
-
+        self::setEventTerms($post_id, $args);
 
         return $post_id;
     }
 
-    public static function createPostarr($args) {
-        $postarr = array(
-            'meta_input'    => array()
-        );
-
-        in_array('title', $args) ? $postarr['post_title'] = $args['title']: NULL;
-    }
-
+    /**
+     * Given the wordpress post ID of the post to change and an array with the arguments, that are supposed to be
+     * changed, this function will update the wordpress post accordingly.
+     * Can have the following arguments:
+     * - title:         The title of the event
+     * - description:   Description of event
+     * - published:     The date, when the info about the event was published on indico. Will also be the date
+     *                  on which the wordpress post was published
+     * - indico_id:     The ID of the event within the indico page
+     * - starting:      The date, when the event starts
+     * - url:           The url to the indico page about the event
+     * - creator:       The name of who created the event on indico
+     * - location:      Where the event is taking place
+     * - type:          What type of event it is
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param $post_id
+     * @param $args
+     * @return mixed
+     */
     public static function update($post_id, $args) {
-        wp_update_post();
+
+        $postarr = self::createPostarr($args);
+        $postarr['ID'] = $post_id;
+        echo wp_update_post($postarr);
+
+        self::setEventTerms($post_id, $args);
 
         return $post_id;
+    }
+
+    /**
+     * Given the argument array, containing the key value pairs of the event specific arguments, this will return the
+     * postarr array, which has to be passed to the wordpress insert post function to actually create a post based on
+     * the given arguments.
+     * This postarr however will only contain the sccording entries for the arguments, that are actually given within
+     * the args array. This means this function can also be used for a post update.
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param array $args   The event specific arguments
+     * @return array
+     */
+    public static function createPostarr(array $args) {
+        $mapping = array(
+            'title'         => 'post_title',
+            'description'   => 'post_content',
+            'published'     => 'post_date',
+            'indico_id'     => 'meta_input/indico_id',
+            'starting'      => 'meta_input/start_date',
+            'url'           => 'meta_input/url'
+        );
+        $postarr = PostUtil::subArrayMapping($mapping, $args);
+        $postarr['post_status'] = 'publish';
+
+        return $postarr;
     }
 
     /**
@@ -234,15 +273,24 @@ class EventPost extends PostPost
      *
      * Added 05.01.2019
      *
+     * Changed 06.01.2019
+     * Generalized it. Changed the three concrete parameters to one array parameter. Now the values dont have to
+     * replaced, they are only replaced if their keys are contained within the given array.
+     *
      * @param string $post_id   The ID of the post, for which to set the values
-     * @param string $creator   The new creator value
-     * @param string $location  The new location
-     * @param string $type      The new type
+     * @param array $args
      */
-    public static function setEventTerms(string $post_id, string $creator, string $location, string $type) {
-        wp_set_object_terms($post_id, $creator, 'creator', false);
-        wp_set_object_terms($post_id, $location,'location', false);
-        wp_set_object_terms($post_id, $type, 'type', false);
+    public static function setEventTerms(string $post_id, array $args) {
+        $taxonomy_mapping = array(
+            'creator'       => 'creator',
+            'location'      => 'location',
+            'type'          => 'type'
+        );
+        foreach ($taxonomy_mapping as $key => $taxonomy) {
+            if (array_key_exists($key, $args)) {
+                wp_set_object_terms($post_id, $args[$key], $taxonomy);
+            }
+        }
     }
 
     /**
