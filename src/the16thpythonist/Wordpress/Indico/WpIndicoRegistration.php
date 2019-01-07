@@ -53,15 +53,19 @@ class WpIndicoRegistration
      *
      * Changed 07.01.2019
      * Added the WpCommands registration and also the function to register all the commands implemented in this package
+     *
+     * @param bool $register_utilities
      */
-    public function register() {
+    public function register($register_utilities=FALSE) {
         add_action('init', array($this, 'enqueueStylesheets'));
 
         // 07.01.2019
         // Activating the usage of the Wordpress Commands package and registering all the commands implemented by this
         // package
-        LogPost::register('log');
-        DataPost::register('data');
+        if ($register_utilities) {
+            LogPost::register('log');
+            DataPost::register('data');
+        }
         WpCommands::register();
         $this->registerCommands();
 
