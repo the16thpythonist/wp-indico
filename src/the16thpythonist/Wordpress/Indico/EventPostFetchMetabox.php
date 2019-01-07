@@ -171,7 +171,7 @@ class EventPostFetchMetabox implements Metabox
         try {
             $event = $this->getIndicoEvent($site['url'], $site['key'], $indico_id);
             $this->updateEvent($post_id, $event);
-        } catch (\Error | \Exception $e) {
+        } catch (\Error $e) {
             // echo var_export($event->data, TRUE);
             echo $e->getMessage();
         }
