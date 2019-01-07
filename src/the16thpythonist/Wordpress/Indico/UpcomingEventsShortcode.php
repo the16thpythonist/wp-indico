@@ -62,13 +62,14 @@ class UpcomingEventsShortcode
     // ************************************
 
     /**
-     * Echos the whole HTML code for the shortcode based on the arguments given to the shortcode.
+     * Returns the whole HTML code for the shortcode based on the arguments given to the shortcode.
      *
      * CHANGELOG
      *
      * Added 07.01.2019
      *
      * @param array $args
+     * @return string
      */
     public function display(array $args)
     {
@@ -79,12 +80,13 @@ class UpcomingEventsShortcode
         // Sorting the list of EventPosts by the time at which the start.
         usort($event_posts, array($this, 'compareEventStartTimes'));
 
-        $count = 0;
+        ob_start();
         ?>
             <div class="<?php  echo $args['class']; ?>">
                 <?php $this->displayListing($event_posts, $args)?>
             </div>
         <?php
+        return ob_get_clean();
     }
 
     /**
