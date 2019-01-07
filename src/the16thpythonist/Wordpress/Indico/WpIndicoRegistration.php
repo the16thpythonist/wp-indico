@@ -71,6 +71,8 @@ class WpIndicoRegistration
 
         // Registering the "Event" post type
         EventPost::register($this->post_type);
+
+        $this->registerShortcodes();
     }
 
     /**
@@ -85,6 +87,18 @@ class WpIndicoRegistration
         FetchIndicoEventsCommand::register('fetch-new-events');
     }
 
+    /**
+     * Registers all the Shortcodes, that are implemented by this package.
+     *
+     * CHANGELOG
+     *
+     * Added 07.01.2019
+     */
+    public function registerShortcodes() {
+        $upcoming_events_shortcode = new UpcomingEventsShortcode();
+        $upcoming_events_shortcode->register();
+    }
+    
     // ***************************
     // STYLESHEETS FOR THE PACKAGE
     // ***************************

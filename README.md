@@ -36,3 +36,4 @@ stylesheets and scripts used.
 from the Event objects returned by the IndicoApi
 - Added the project [wp-commands](https://github.com/the16thpythonist/wp_commands) to the project for handling parallel 
 background commands.
+- Added the 'display-upcoming-events' shortcode, with which a list of the next events can be generated.
