@@ -209,22 +209,19 @@ class EventPostFetchMetabox implements Metabox
      *
      * Added 06.01.2019
      *
+     * Changed 07.01.2019
+     * Replaced the manual creation of the arguments array with the usage of a specific adapter object, which creates
+     * the arguments array from the event object.
+     *
      * @param string $post_id
      * @param Event $event
      */
     public function updateEvent(string $post_id, Event $event) {
-        // Creating the arguments array for the insert operation
-        $args = array(
-                'title'         => $event->getTitle(),
-                'description'   => $event->getDescription(),
-                'published'     => $event->getModificationTime()->format('Y-m-d H:i:s'),
-                'starting'      => $event->getStartTime()->format('Y-m-d H:i:s'),
-                'indico_id'     => $event->getID(),
-                'url'           => $event->getURL(),
-                'creator'       => $event->getCreator(),
-                'location'      => $event->getLocation(),
-                'type'          => $event->getType(),
-        );
+        // 07.01.2019
+        // Creating the arguments array for the insert operation using an adapter object, which does just that
+        $event_adapter = new EventAdapter($event);
+        $args = $event_adapter->getInsertArgs();
+
         EventPost::update($post_id, $args);
     }
 

@@ -9,6 +9,8 @@
 namespace the16thpythonist\Wordpress\Indico;
 
 
+use Log\LogInterface;
+use Log\LogPost;
 use the16thpythonist\Indico\Event;
 use the16thpythonist\Indico\IndicoApi;
 
@@ -33,7 +35,17 @@ class EventFetcher
 
     );
 
-    public function __construct(array $args, $log)
+    /**
+     * EventFetcher constructor.
+     *
+     * CHANGELOG
+     *
+     * Added 06.01.2019
+     *
+     * @param array $args
+     * @param $log
+     */
+    public function __construct(array $args, LogInterface $log)
     {
         $this->args = array_replace(self::DEFAULT_ARGS, $args);
 
@@ -55,8 +67,9 @@ class EventFetcher
         // We loop through each observed site and fetch the events separately
         $events = array();
         $sites = KnownIndicoSites::getAllSites();
+        $this->log->info('NUMBER OF OBSERVED INDICO SITES: ' . count($sites));
         foreach ($sites as $site) {
-
+            $this->log->info(sprintf('STARTING TO FETCH FOR: <a href="%s">%s</a>', $site['url'], $site['name']));
             $site_events = $this->getNewSiteEvents($site);
             $events = array_merge($events, $site_events);
         }
@@ -78,18 +91,21 @@ class EventFetcher
     public function getNewSiteEvents(array $site) {
         // Creating a new API object for the specific site
         $this->api = new IndicoApi($site['url'], $site['key']);
+        $this->log->info('CREATED A NEW INDICO API OBJECT FOR THE SITE');
 
         // Computing all the indico IDs of the events that are already on the wordpress system as posts (those obv.
         // dont have to be posted again)
         $event_posts = $this->getEventPostsOfSite($site['name']);
         $indico_ids = array_map(function ($e) {return $e->indico_id;}, $event_posts);
+        $this->log->info('NUMBER OF POSTS BELONGING TO THIS SITE: ' . count($indico_ids));
 
         $site_events = array();
         // Iterating through all the categories
         foreach ($site['categories'] as $category_id) {
             $events = $this->api->getCategory($category_id);
+            $this->log->info(sprintf('NUMBER OF EVENTS FOR CATEGORY "%s": %s', $category_id, count($events)));
             $filtered_events = $this->getFilteredEvents($events, $indico_ids);
-            $events = array_merge($site_events, $filtered_events);
+            $site_events = array_merge($site_events, $filtered_events);
         }
         return $site_events;
     }

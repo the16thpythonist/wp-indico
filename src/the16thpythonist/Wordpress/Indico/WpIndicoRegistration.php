@@ -8,6 +8,10 @@
 
 namespace the16thpythonist\Wordpress\Indico;
 
+use the16thpythonist\Wordpress\WpCommands;
+use Log\LogPost;
+use the16thpythonist\Wordpress\Data\DataPost;
+
 /**
  * Class WpIndicoRegistration
  *
@@ -36,18 +40,45 @@ class WpIndicoRegistration
         $this->post_type = $post_type;
     }
 
+    // **************************
+    // SETUP CODE FOR THE PACKAGE
+    // **************************
+
     /**
      * Registers the post type "Event" in wordpress
      *
      * CHANGELOG
      *
      * Added 06.01.2019
+     *
+     * Changed 07.01.2019
+     * Added the WpCommands registration and also the function to register all the commands implemented in this package
      */
     public function register() {
         add_action('init', array($this, 'enqueueStylesheets'));
 
+        // 07.01.2019
+        // Activating the usage of the Wordpress Commands package and registering all the commands implemented by this
+        // package
+        LogPost::register('log');
+        DataPost::register('data');
+        WpCommands::register();
+        $this->registerCommands();
+
         // Registering the "Event" post type
         EventPost::register($this->post_type);
+    }
+
+    /**
+     * Registers all the commands, that were implemented for this package, so they can be used from within the sites
+     * admin dashboard.
+     *
+     * CHANGELOG
+     *
+     * Added 07.01.2019
+     */
+    public function registerCommands() {
+        FetchIndicoEventsCommand::register('fetch-new-events');
     }
 
     // ***************************
@@ -72,6 +103,8 @@ class WpIndicoRegistration
     // ***********************
     // SCRIPTS FOR THE PACKAGE
     // ***********************
+
+
 
     // **************************
     // GENERAL AJAX FUNCTIONALITY

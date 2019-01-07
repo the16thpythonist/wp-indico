@@ -13,7 +13,7 @@
 - Added "EventPostRegistration" class which manages the registration of the post type "Event" 
 to the wordpress system.
 
-### 0.0.0.2 -06.01.2019
+### 0.0.0.2 - 06.01.2019
 
 - Added the "WpIndico" class, which acts as a facade for the whole package functionality
 - Added "EventPostFetchMetabox", which manages the registration and functionality of a metabox
@@ -27,3 +27,12 @@ all observed indico sites and their urls, api keys etc.
 stylesheets and scripts used.
 - Added "wp-indico.css"
     - Added styles for the fetch metabox of the event type
+
+### 0.0.0.3 - 07.01.2019
+
+- Added "EventFetcher", which handles the actual requests to the web APIs of the observed indico sites
+- Added the "FetchIndicoEventsCommand" command, with which new Events can be fetched from all the observed indico sites
+- Added EventAdapter. A simple utility class, which directly creates an arguments array for the post insert operation 
+from the Event objects returned by the IndicoApi
+- Added the project [wp-commands](https://github.com/the16thpythonist/wp_commands) to the project for handling parallel 
+background commands.
