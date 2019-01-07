@@ -205,7 +205,7 @@ class UpcomingEventsShortcode
      * @return false|int
      */
     public function compareEventStartTimes(EventPost $event1, EventPost $event2) {
-        $time_difference = strtotime($event1->start) - strtotime($event2->start);
+        $time_difference =  strtotime($event2->start) - strtotime($event1->start);
         return $time_difference;
     }
 
