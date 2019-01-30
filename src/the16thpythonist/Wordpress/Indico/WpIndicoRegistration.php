@@ -25,6 +25,7 @@ class WpIndicoRegistration
 {
 
     public $post_type;
+    public $register_utility_flag;
 
     /**
      * WpIndicoRegistration constructor.
@@ -35,9 +36,10 @@ class WpIndicoRegistration
      *
      * @param string $post_type
      */
-    public function __construct(string $post_type)
+    public function __construct(string $post_type, bool $register_utility=FALSE)
     {
         $this->post_type = $post_type;
+        $this->register_utility_flag = $register_utility;
     }
 
     // **************************
@@ -54,24 +56,19 @@ class WpIndicoRegistration
      * Changed 07.01.2019
      * Added the WpCommands registration and also the function to register all the commands implemented in this package
      *
+     * Changed 30.01.2019
+     * Put all the registrations into separate methods and then just calling these methods now.
+     * Added an additional method for registering the options page
+     *
      * @param bool $register_utilities
      */
-    public function register($register_utilities=FALSE) {
+    public function register() {
         add_action('init', array($this, 'enqueueStylesheets'));
 
-        // 07.01.2019
-        // Activating the usage of the Wordpress Commands package and registering all the commands implemented by this
-        // package
-        if ($register_utilities) {
-            LogPost::register('log');
-            DataPost::register('data');
-        }
-        WpCommands::register();
-        $this->registerCommands();
-
-        // Registering the "Event" post type
-        EventPost::register($this->post_type);
-
+        //$this->registerUtility();
+        $this->registerPages();
+        //$this->registerCommands();
+        $this->registerPostTypes();
         $this->registerShortcodes();
     }
 
@@ -98,7 +95,40 @@ class WpIndicoRegistration
         $upcoming_events_shortcode = new UpcomingEventsShortcode();
         $upcoming_events_shortcode->register();
     }
-    
+
+    /**
+     * Registers all the post types relevant to the indico plugin.
+     * Currently only includes the "event" post type.
+     *
+     * CHANGELOG
+     *
+     * Added 30.01.2019
+     */
+    public function registerPostTypes() {
+        EventPost::register($this->post_type);
+    }
+
+    /**
+     * Registers additional static pages within the wordpress admin area.
+     * Currently only includes the custom options page.
+     */
+    public function registerPages() {
+        $option_page_registration = new IndicoOptionsRegistration();
+        $option_page_registration->register();
+    }
+
+    /**
+     * Registers all the additional packages, on which the functionality of this package is based on.
+     * That would be the LogPost and the DataPost as well as the WpCommands package.
+     */
+    public function registerUtility() {
+        if ($this->register_utility_flag) {
+            LogPost::register('log');
+            DataPost::register('data');
+        }
+        WpCommands::register();
+    }
+
     // ***************************
     // STYLESHEETS FOR THE PACKAGE
     // ***************************

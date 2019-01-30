@@ -41,10 +41,10 @@ class WpIndico
      * @param string $post_type The string post type
      * @param array $sites      An array specifying the indico sites to be observed
      */
-    public static function register(string $post_type, array $sites, $flag=FALSE) {
+    public static function register(string $post_type, array $sites) {
 
         self::$REGISTRATION = new WpIndicoRegistration($post_type);
-        self::$REGISTRATION->register($flag);
+        self::$REGISTRATION->register();
 
         // Adding the observed indico sites to the static container
         self::registerSites($sites);
