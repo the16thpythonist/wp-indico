@@ -21,7 +21,7 @@ use the16thpythonist\Wordpress\Functions\PostUtil;
  *
  * @package the16thpythonist\Wordpress\Indico
  */
-class EventPost extends PostPost
+class EventPost
 {
     public static $POST_TYPE;
 

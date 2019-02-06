@@ -101,9 +101,7 @@ class WpIndico
     // GENERAL FUNCTIONALITY FOR THE PACKAGE
     // *************************************
 
-    // ******************************************
-    // GENERAL AJAX FUNCTIONALITY FOR THE PACKAGE
-    // ******************************************
+
 
 
 }

@@ -20,7 +20,7 @@ use the16thpythonist\Wordpress\Functions\PostUtil;
  *
  * @package the16thpythonist\Wordpress\Indico
  */
-class EventPostRegistration implements PostRegistration
+class EventPostRegistration
 {
     public $post_type;
 

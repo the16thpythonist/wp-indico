@@ -91,8 +91,23 @@ class IndicoOptionsRegistration
      */
     public function display() {
         ?>
+        <script>
+            var INFO = "<?php echo count(KnownIndicoSites::$INDICO_SITES); ?>";
+            var SITES = [
+                <?php foreach (KnownIndicoSites::$INDICO_SITES as $site): ?>
+                {
+                    'name':         <?php echo $site['name']; ?>,
+                    'key':          <?php echo $site['key']; ?>,
+                    'url':          <?php echo $site['url']; ?>,
+                    'categories':   <?php echo $site['categories']; ?>
+                },
+                <?php endforeach; ?>
+            ];
+        </script>
         <div class="wrap">
-            <h2>Hello</h2>
+            <div id="indico-options-main">
+                <indico-options></indico-options>
+            </div>
         </div>
         <?php
     }

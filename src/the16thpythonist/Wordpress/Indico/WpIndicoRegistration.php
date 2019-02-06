@@ -60,14 +60,16 @@ class WpIndicoRegistration
      * Put all the registrations into separate methods and then just calling these methods now.
      * Added an additional method for registering the options page
      *
-     * @param bool $register_utilities
+     * Changed 31.01.2019
+     * Also removed the direct call bind enqueueStylesheets to a action hook. Instead using the register assets method
+     * now, which will handle stylesheets and the scripts.
      */
     public function register() {
-        add_action('init', array($this, 'enqueueStylesheets'));
 
-        //$this->registerUtility();
+        $this->registerAssets();
+        $this->registerUtility();
         $this->registerPages();
-        //$this->registerCommands();
+        $this->registerCommands();
         $this->registerPostTypes();
         $this->registerShortcodes();
     }
@@ -103,9 +105,17 @@ class WpIndicoRegistration
      * CHANGELOG
      *
      * Added 30.01.2019
+     *
+     * Changed 04.02.2019
+     * Added the "IndicoSitePost" post type to also be registered.
      */
     public function registerPostTypes() {
         EventPost::register($this->post_type);
+
+        // 04.02.2019
+        // The "indico site" post type will be used as code-internal data representation of observed indico sites.
+        // it is not publicly exposed or editable.
+        IndicoSitePost::register('indico-sites');
     }
 
     /**
@@ -129,6 +139,21 @@ class WpIndicoRegistration
         WpCommands::register();
     }
 
+    /**
+     * Calls the functions to hook in the enqueue of all the relevant stylesheets and scripts
+     *
+     * CHANGELOG
+     *
+     * Added 31.01.2019
+     */
+    public function registerAssets() {
+        // The CSS stylesheets
+        add_action('init', array($this, 'enqueueStylesheets'));
+
+        // The JS scripts
+        add_action('init', array($this, 'enqueueScripts'));
+    }
+
     // ***************************
     // STYLESHEETS FOR THE PACKAGE
     // ***************************
@@ -146,13 +171,45 @@ class WpIndicoRegistration
             'indico-style',
             plugin_dir_url(__FILE__) . 'wp-indico.css'
         );
+
+        wp_enqueue_style(
+            'boostrap',
+            '//unpkg.com/bootstrap/dist/css/bootstrap.min.css'
+        );
+
+        wp_enqueue_style(
+            'bootstrap-vue',
+            '//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css'
+        );
     }
 
     // ***********************
     // SCRIPTS FOR THE PACKAGE
     // ***********************
 
+    /**
+     * Calls the functions to add the Vue.js framework to the header of each HTML document
+     *
+     * CHANGELOG
+     *
+     * Added 31.01.2019
+     */
+    public function enqueueScripts() {
+        /**wp_enqueue_script(
+            'vue',
+            'https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js',
+            [],
+            '2.5.16'
+        );**/
 
+        wp_enqueue_script(
+            'build',
+            plugin_dir_url(__FILE__) . 'build.js',
+            [],
+            '0.0.2',
+            true
+        );
+    }
 
     // **************************
     // GENERAL AJAX FUNCTIONALITY
