@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use the16thpythonist\Wordpress\Indico\EventPost;
 use the16thpythonist\Wordpress\Functions\PostUtil;
 
-class TestEventPost extends TestCase
+class EventPostTest extends TestCase
 {
     public function testSubArrayMappingIsWorking() {
         $mapping = array(
@@ -23,8 +23,6 @@ class TestEventPost extends TestCase
             'hello' => 2
         );
         $result = PostUtil::subArrayMapping($mapping, $data);
-
-        var_dump($result);
 
         $this->assertArrayHasKey('hello', $result);
         $this->assertArrayHasKey('test', $result['hello']);

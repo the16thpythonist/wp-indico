@@ -11,6 +11,7 @@ namespace the16thpythonist\Wordpress\Indico;
 
 use the16thpythonist\Wordpress\Base\OptionPageRegistration;
 use the16thpythonist\Wordpress\Base\PostRegistration;
+use the16thpythonist\Wordpress\Functions\PostUtil;
 
 /**
  * Class IndicoOptionsRegistration
@@ -90,19 +91,14 @@ class IndicoOptionsRegistration
      * @return string
      */
     public function display() {
+        // Here we are getting all the indico sites, that are currently saved in the wordpress system, to pass them
+        // as a javascript object to the front end vue application code, that is being hooked in here.
+        $sites = IndicoSitePost::getAllArrays();
+        $javascript_object_name = 'INDICO_SITES';
+        $javascript_code = PostUtil::javascriptExposeObjectArray($javascript_object_name, $sites);
         ?>
         <script>
-            var INFO = "<?php echo count(KnownIndicoSites::$INDICO_SITES); ?>";
-            var SITES = [
-                <?php foreach (KnownIndicoSites::$INDICO_SITES as $site): ?>
-                {
-                    'name':         <?php echo $site['name']; ?>,
-                    'key':          <?php echo $site['key']; ?>,
-                    'url':          <?php echo $site['url']; ?>,
-                    'categories':   <?php echo $site['categories']; ?>
-                },
-                <?php endforeach; ?>
-            ];
+            <?php echo $javascript_code; ?>
         </script>
         <div class="wrap">
             <div id="indico-options-main">

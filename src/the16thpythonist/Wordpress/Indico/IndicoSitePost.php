@@ -115,6 +115,35 @@ class IndicoSitePost
     // ***************
 
     /**
+     * Returns an array, which contains associative arrays, that represent each indico site, that is currently being
+     * represented by a post
+     *
+     * CHANGELOG
+     *
+     * Added 07.02.2019
+     *
+     * @param bool $assoc
+     * @return array
+     */
+    public static function getAllArrays(bool $assoc=TRUE) {
+        $sites = self::getAll();
+        $arrays = array();
+        foreach ($sites as $site) {
+            if ($assoc) {
+                $arrays[] = array(
+                    'name'          => $site->name,
+                    'url'           => $site->url,
+                    'key'           => $site->key,
+                    'categories'    => $site->categories
+                );
+            } else {
+                $arrays[] = array($site->name, $site->url, $site->key, $site->categories);
+            }
+        }
+        return $sites;
+    }
+
+    /**
      * Returns an array containing IndicoSitePost objects for all the sites saved on the wordpress system.
      *
      * CHANGELOG
@@ -230,7 +259,12 @@ class IndicoSitePost
      *
      * Added 04.02.2019
      *
+     * Changed 07.02.2019
+     * The method now returns the wordpress post ID of the newly inserted post
+     *
      * @param $args
+     *
+     * @return int
      */
     public static function insert(array $args) {
         // In case there are not all necessary arguments given, the rest is being supplemented with the default insert
@@ -241,8 +275,9 @@ class IndicoSitePost
         // from the arguments array
         $postarr = self::createPostarr($args);
         $postarr['post_type'] = self::$POST_TYPE;
+        var_dump($postarr);
 
-        wp_insert_post($postarr);
+        return wp_insert_post($postarr);
     }
 
     /**
@@ -342,7 +377,7 @@ class IndicoSitePost
      * @param array $args
      * @return array
      */
-    protected static function createPostarr(array $args) {
+    public static function createPostarr(array $args) {
         $mapping = array(
             'name'          => 'post_title',
             'url'           => 'meta_input/url',
