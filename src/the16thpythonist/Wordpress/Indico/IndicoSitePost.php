@@ -275,7 +275,6 @@ class IndicoSitePost
         // from the arguments array
         $postarr = self::createPostarr($args);
         $postarr['post_type'] = self::$POST_TYPE;
-        var_dump($postarr);
 
         return wp_insert_post($postarr);
     }
@@ -360,6 +359,21 @@ class IndicoSitePost
         $indico_site = self::getSite($name);
         if ($indico_site) {
             self::deletePost($indico_site->ID);
+        }
+    }
+
+    /**
+     * This method deletes all the indico sites currently in the system.
+     * USE WITH CAUTION.
+     *
+     * CHANGELOG
+     *
+     * Added 07.02.2019
+     */
+    public static function deleteAll() {
+        $posts = self::getAllPosts();
+        foreach ($posts as $post) {
+            self::deletePost($post->ID);
         }
     }
 

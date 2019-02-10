@@ -95,8 +95,14 @@ class IndicoOptionsRegistration
         // as a javascript object to the front end vue application code, that is being hooked in here.
         $sites = IndicoSitePost::getAllArrays();
         $javascript_object_name = 'INDICO_SITES';
-        $javascript_code = PostUtil::javascriptExposeObjectArray($javascript_object_name, $sites);
+        try{
+            $javascript_code = PostUtil::javascriptExposeObjectArray($javascript_object_name, $sites);
+        }catch (\Error $e) {
+            var_dump($e->getMessage());
+        }
+
         ?>
+        <h1>LUTSCHER</h1>
         <script>
             <?php echo $javascript_code; ?>
         </script>

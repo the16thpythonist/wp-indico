@@ -11,6 +11,7 @@ namespace the16thpythonist\Wordpress\Indico;
 use the16thpythonist\Wordpress\WpCommands;
 use Log\LogPost;
 use the16thpythonist\Wordpress\Data\DataPost;
+use the16thpythonist\Wordpress\Functions\PostUtil;
 
 /**
  * Class WpIndicoRegistration

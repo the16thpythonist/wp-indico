@@ -49,8 +49,6 @@
 
 <script>
 
-    let axios = require('axios');
-
     function emptySite() {
         return {
             'name':         '',
@@ -104,14 +102,13 @@
         return validity;
     }
 
-    console.log(SITES);
-    console.log(INFO);
+    console.log(INDICO_SITES);
 
     module.exports = {
         props: {
             sites: {
                 default: function() {
-                    let sites = SITES;
+                    let sites = INDICO_SITES;
                     sites.push(emptySite());
                     return sites;
                 }
@@ -132,25 +129,6 @@
                     // only being executed if the entered site info is valid! (Thus being in this else branch)
 
                     // Sending the data to the server
-                    /**
-                    console.log(ajaxURL());
-                    axios({
-                        method:     'get',
-                        url:        ajaxURL(),
-                        data:       {
-                            action:     'add_indico_site',
-                            name:       site.name,
-                            url:        site.url,
-                            key:        site.key,
-                            categories: site.categories
-                        }
-                    }).then(function (response) {
-                        console.log(response);
-                    }).catch(function (error) {
-                        console.log(error);
-                    });
-                    **/
-
                     jQuery.ajax({
                         url:        ajaxURL(),
                         type:       'GET',

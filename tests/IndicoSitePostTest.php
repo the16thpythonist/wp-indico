@@ -7,11 +7,12 @@
  */
 
 use PHPUnit\Framework\TestCase;
+use the16thpythonist\Wordpress\Test\JWPTestCase;
 
 use the16thpythonist\Wordpress\Indico\IndicoSitePost;
 use the16thpythonist\Wordpress\Indico\IndicoSitePostRegistration;
 
-class IndicoSitePostTest extends TestCase
+class IndicoSitePostTest extends JWPTestCase
 {
     // This array will be used to insert a default IndicoSite post into the data base
     const DEFAULT_INSERT_ARGS = array(
@@ -51,7 +52,7 @@ class IndicoSitePostTest extends TestCase
 
     public function testPostarrCreationWorks() {
         $postarr = IndicoSitePost::createPostarr(self::DEFAULT_INSERT_ARGS);
-        $this->assertArraySubset(self::DEFAULT_POSTARR, $postarr);
+        $this->assertAssocArrayContentEquals(self::DEFAULT_POSTARR, $postarr);
     }
 
     // ****************
@@ -59,10 +60,20 @@ class IndicoSitePostTest extends TestCase
     // ****************
 
     public function testWrapperInsertWorks() {
-        $post_id = IndicoSitePost::insert(self::DEFAULT_POSTARR);
+        $post_id = IndicoSitePost::insert(self::DEFAULT_INSERT_ARGS);
+        $this->assertPostExists($post_id);
+        // removing the post again
+        wp_delete_post($post_id);
+    }
 
-        $post = get_post($post_id);
-        // $this->assertEquals(self::DEFAULT_INSERT_ARGS['name'], $post->post_title);
+    public function testDeleteSiteByName() {
+        // Inserting a new post
+        $post_id = IndicoSitePost::insert(self::DEFAULT_INSERT_ARGS);
+        $this->assertPostExists($post_id);
+
+        // Deleting the post by the site name
+        IndicoSitePost::deleteSite(self::DEFAULT_INSERT_ARGS['name']);
+        $this->assertPostNotExists($post_id);
     }
 
 }
