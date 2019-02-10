@@ -61,15 +61,19 @@ class EventFetcher
      *
      * Added 06.01.2019
      *
+     * Changed 10.02.2019
+     * I completely reworked the way observed indico sites work into using the IndicoSitePost object, thus this method
+     * has been updated with using such an object for getting the relevant info such as url and key for a indico site.
+     *
      * @return array
      */
     public function getNew() {
         // We loop through each observed site and fetch the events separately
         $events = array();
-        $sites = KnownIndicoSites::getAllSites();
+        $sites = IndicoSitePost::getAll();
         $this->log->info('NUMBER OF OBSERVED INDICO SITES: ' . count($sites));
         foreach ($sites as $site) {
-            $this->log->info(sprintf('STARTING TO FETCH FOR: <a href="%s">%s</a>', $site['url'], $site['name']));
+            $this->log->info(sprintf('STARTING TO FETCH FOR: <a href="%s">%s</a>', $site->url, $site->name));
             $site_events = $this->getNewSiteEvents($site);
             $events = array_merge($events, $site_events);
         }
@@ -85,23 +89,27 @@ class EventFetcher
      *
      * Added 06.01.2019
      *
-     * @param array $site
+     * Changed 10.02.2019
+     * I completely reworked the way observed indico sites work into using the IndicoSitePost object, thus this method
+     * has been updated with using such an object for getting the relevant info such as url and key for a indico site.
+     *
+     * @param IndicoSitePost $site
      * @return array
      */
-    public function getNewSiteEvents(array $site) {
+    public function getNewSiteEvents(IndicoSitePost $site) {
         // Creating a new API object for the specific site
-        $this->api = new IndicoApi($site['url'], $site['key']);
-        $this->log->info('CREATED A NEW INDICO API OBJECT FOR THE SITE');
+        $this->api = new IndicoApi($site->url, $site->key);
+        $this->log->info(sprintf('CREATED A NEW INDICO API FOR SITE "%s"', $site->name));
 
         // Computing all the indico IDs of the events that are already on the wordpress system as posts (those obv.
         // dont have to be posted again)
-        $event_posts = $this->getEventPostsOfSite($site['name']);
+        $event_posts = $this->getEventPostsOfSite($site);
         $indico_ids = array_map(function ($e) {return $e->indico_id;}, $event_posts);
         $this->log->info('NUMBER OF POSTS BELONGING TO THIS SITE: ' . count($indico_ids));
 
         $site_events = array();
         // Iterating through all the categories
-        foreach ($site['categories'] as $category_id) {
+        foreach ($site->categories as $category_id) {
             $events = $this->api->getCategory($category_id);
             $this->log->info(sprintf('NUMBER OF EVENTS FOR CATEGORY "%s": %s', $category_id, count($events)));
             $filtered_events = $this->getFilteredEvents($events, $indico_ids);
@@ -143,14 +151,16 @@ class EventFetcher
      *
      * Added 06.01.2019
      *
-     * @param string $site_name
+     * Changed 10.02.2019
+     * I completely reworked the way observed indico sites work into using the IndicoSitePost object, thus this method
+     * has been updated with using such an object for getting the relevant info such as url and key for a indico site.
+     *
+     * @param IndicoSitePost $site
      * @return array
      */
-    public function getEventPostsOfSite(string $site_name) {
+    public function getEventPostsOfSite(IndicoSitePost $site) {
         // We will identify the site from which an Event originates by the site url meta value. We will compare that
         // url, which is an attribute of the event post with the URL of the given site
-        $site = KnownIndicoSites::getSite($site_name);
-
         $args = array(
             'post_type'         => EventPost::$POST_TYPE,
             'post_status'       => 'publish',
@@ -158,7 +168,7 @@ class EventFetcher
             'meta_query'        => array(
                 array(
                     'key'           => 'site_url',
-                    'value'         => $site['url'],
+                    'value'         => $site->url,
                     'compare'       => 'IN'
                 )
             )

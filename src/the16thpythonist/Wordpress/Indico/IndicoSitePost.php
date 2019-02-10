@@ -122,6 +122,11 @@ class IndicoSitePost
      *
      * Added 07.02.2019
      *
+     * Changed 10.02.2019
+     * There was a problem, where I returned the $sites variable instead of the actual calculated $arrays. Fixed that
+     * Added the additional key "ID" to the arrays for the sites, which contains the wordpress post ID for that site
+     * post. This will have to be used in the front end to update information about an existing site.
+     *
      * @param bool $assoc
      * @return array
      */
@@ -131,6 +136,7 @@ class IndicoSitePost
         foreach ($sites as $site) {
             if ($assoc) {
                 $arrays[] = array(
+                    'ID'            => $site->ID,
                     'name'          => $site->name,
                     'url'           => $site->url,
                     'key'           => $site->key,
@@ -140,7 +146,7 @@ class IndicoSitePost
                 $arrays[] = array($site->name, $site->url, $site->key, $site->categories);
             }
         }
-        return $sites;
+        return $arrays;
     }
 
     /**

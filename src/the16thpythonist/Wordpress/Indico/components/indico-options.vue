@@ -10,7 +10,7 @@
 
             <div class="indico-site-input" v-for="key in Object.keys(site)">
 
-                <b-input-group id="indico-site-input-form" :prepend="key" size="sm">
+                <b-input-group v-if="key !== 'ID'" id="indico-site-input-form" :prepend="key" size="sm">
                     <b-form-input type="text" v-model="site[key]"></b-form-input>
                 </b-input-group>
 
@@ -49,116 +49,291 @@
 
 <script>
 
-    function emptySite() {
-        return {
-            'name':         '',
-            'key':          '',
-            'url':          '',
-            'categories':   ''
+    axios = require('axios');
+    jquery = require('jquery');
+
+    /**
+     * This is a MODULE, that contains the functionality to actually issue the local changes to the server using AJAX
+     * requests.
+     *
+     * This module offers the following functions:
+     * - add(site):         Registers a new indico site post with the parameters of the given site
+     * - update(site):      Updates the post corresponding to the id of the given site with the new parameters defined
+     *                      by the given site
+     * - remove(site):      Removes the site with the given name.
+     *
+     * CHANGELOG
+     *
+     * Added 10.02.2019
+     *
+     * @type {{add, update, remove}}
+     */
+    let indicoSiteAjax = (function () {
+
+        /**
+         * This function executes the given action on the wordpress server, passing along the given parameters from the
+         * 'parameters' object.
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @param action_name
+         * @param parameters
+         */
+        let doAction = function (action_name, parameters) {
+            let data = {...{action: action_name}, ...parameters};
+            jquery.ajax({
+                url:        ajaxURL(),
+                type:       'GET',
+                timeout:    60000,
+                dataType:   'html',
+                async:      true,
+                data:       data,
+                success:    function (response) {
+                    //console.log(response);
+                },
+                error:      function (response) {
+                    //console.log(response);
+                }
+            });
         };
-    }
 
-    function isSiteEmpty(site) {
-        let isEmpty = true;
-        Object.keys(site).forEach(function (key) {
-            if (site[key] !== "") {
-                isEmpty = false;
+        /**
+         * Creates a new wordpress indico site post with the parameters according to the given 'site' object
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @param site
+         */
+        let add = function (site) {
+            doAction('add_indico_site', site);
+        };
+
+        /**
+         * Updates the indico site object with the wordpress post id given as the 'ID' attribute of the passed site
+         * object with the new values specified within site.
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @param site
+         */
+        let update = function (site) {
+            doAction('update_indico_site', site);
+        };
+
+        /**
+         * Removes the given site from the wordpress system
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @param site
+         */
+        let remove = function (site) {
+            doAction('delete_indico_site', site)
+        };
+
+        return {
+            add: add,
+            update: update,
+            remove: remove
+        }
+    })();
+
+    /**
+     * This is a MODULE, that contains the functionality to deal with 'site' objects.
+     *
+     * CHANGELOG
+     *
+     * Added 10.02.2019
+     *
+     * @type {{getEmpty, isEmpty, getValidity}}
+     */
+    let indicoSite = (function () {
+
+        /**
+         * Returns an empty site object, containing an empty string for the site name, url, key and categories
+         * attribute.
+         * Does not contain the 'ID' attribute! As only already existing sites can have a wordpress post id
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @returns {{name: string, key: string, url: string, categories: string}}
+         */
+        let getEmpty = function () {
+            return {
+                'name':         '',
+                'key':          '',
+                'url':          '',
+                'categories':   ''
+            };
+        };
+
+        /**
+         * Whether or not the given site is empty.
+         *
+         * CHANGELOG
+         *
+         * Added 10.02.2019
+         *
+         * @param site
+         *
+         * @returns {boolean}
+         */
+        let isEmpty = function(site) {
+            let isEmpty = true;
+            Object.keys(site).forEach(function (key) {
+                if (site[key] !== "") {
+                    isEmpty = false;
+                }
+            });
+            return isEmpty;
+        };
+
+        /**
+         * Returns a 'validity' object, that contains the boolean value of whether or not the given site object
+         * represents a valid input for a indico site or not. It also contains a message of what is wrong in case the
+         * site object does not contain valid information.
+         *
+         * The list of all sites has to be passed to this function as well, as the site name needs to be unique and to
+         * check that a reference to all other existing site names is necessary
+         *
+         * CHANGELOG
+         *
+         * Added 02.10.2019
+         *
+         * @param site
+         * @param sites
+         *
+         * @returns {{status: boolean, message: string}}
+         */
+        let getValidity = function (site, sites) {
+            let validity = {};
+
+            // The site is only valid if the site name is unique and not already given to another site. Also it is only
+            // valid if the site name is not an empty string!
+
+            let counts = {};
+            sites.forEach(x => counts[x.name] = (counts[x.name] || 0) + 1);
+            console.log(counts);
+
+            if (site.name === '') {
+                validity.status = false;
+                validity.message = 'Site must be named!'
+            } else if (counts[site.name] > 1) {
+                validity.status = false;
+                validity.message = 'Site name is not unique!'
+            } else {
+                validity.status = true;
+                validity.message = '';
             }
-        });
-        return isEmpty;
-    }
 
+            return validity;
+        };
+
+        return {
+            getEmpty: getEmpty,
+            isEmpty: isEmpty,
+            getValidity: getValidity
+        }
+
+    })();
+
+    /**
+     * Given the whole list of all sites currently being displayed, this will return the boolean value of whether or
+     * not the list contains an empty site object (site object with all attributes being empty string)
+     *
+     * CHANGELOG
+     *
+     * Added 10.02.2019
+     *
+     * @param sites
+     * @return {boolean}
+     */
     function containsEmptySite(sites) {
         let containsEmpty = false;
         sites.forEach(function (site) {
-            if (isSiteEmpty(site)) {
+            if (indicoSite.isEmpty(site)) {
                 containsEmpty = true;
             }
         });
         return containsEmpty;
     }
 
-    function getSiteValidity(site, sites) {
-        let validity = {};
-
-        // The site is only valid if the site name is unique and not already given to another site. Also it is only
-        // valid if the site name is not an empty string!
-
-        let counts = {};
-        sites.forEach(x => counts[x.name] = (counts[x.name] || 0) + 1);
-        console.log(counts);
-
-        if (site.name === '') {
-            validity.status = false;
-            validity.message = 'Site must be named!'
-        } else if (counts[site.name] > 1) {
-            validity.status = false;
-            validity.message = 'Site name is not unique!'
-        } else {
-            validity.status = true;
-            validity.message = '';
-        }
-
-        return validity;
-    }
-
-    console.log(INDICO_SITES);
-
+    // Here the main vue functionality is defined
     module.exports = {
         props: {
             sites: {
+
                 default: function() {
+                    // The sites, which currently exist in the form of wordpress posts are passed to the front end by
+                    // the php backend through the INDICO_SITES global variable.
+                    // We will just append an additional empty site object, so that the user can enter a new indico
+                    // site into the empty input fields.
                     let sites = INDICO_SITES;
-                    sites.push(emptySite());
+                    sites.push(indicoSite.getEmpty());
                     return sites;
                 }
             }
         },
         methods: {
+
+            /**
+             * This is a callback, that gets called, when the "update" button for any of the sites is being pressed.
+             * It needs to be passed the site object for the site of which the button was pressed.
+             * This method will either add a new indico site post or update an existing one.
+             *
+             * CHANGELOG
+             *
+             * Added 10.02.2019
+             *
+             * @param site
+             */
             updateSite: function (site) {
 
                 // First we need to validate the information entered into the field.
                 // The validity is an object, which contains the boolean "status" property, which is the actual flag
                 // of whether or not it is valid, and the "message" property, which is a message that describes, what
                 // is wrong in case it isn't valid.
-                let validity = getSiteValidity(site, this.sites);
+                let validity = indicoSite.getValidity(site, this.sites);
                 if (validity.status === false) {
                     alert(validity.message);
                 } else {
                     // The normal update process (which includes sending the data to the server to be stored there) is
                     // only being executed if the entered site info is valid! (Thus being in this else branch)
-
-                    // Sending the data to the server
-                    jQuery.ajax({
-                        url:        ajaxURL(),
-                        type:       'GET',
-                        timeout:    60000,
-                        dataType:   'html',
-                        async:      true,
-                        data:       {
-                            action:     'add_indico_site',
-                            name:       site.name,
-                            url:        site.url,
-                            key:        site.key,
-                            categories: site.categories
-                        },
-                        success:    function (response) {
-                            console.log(response);
-                        },
-                        error:      function (response) {
-                            console.log(response);
-                        }
-                    });
-
+                    if(site.hasOwnProperty('ID')) {
+                        indicoSiteAjax.update(site);
+                    } else {
+                        indicoSiteAjax.add(site);
+                    }
 
                     // If after updating the site, there are no empty sites in the list anymore, a new one will be added
                     // to it, so that the user can add more observed sites
                     if (!containsEmptySite(this.sites)) {
-                        let emptySiteObject = emptySite();
+                        let emptySiteObject = indicoSite.getEmpty();
                         this.sites.push(emptySiteObject);
                     }
                 }
             },
+
+            /**
+             * This is a callback, which gets called, when the "delete" button for any of the sites is being pressed.
+             * It will delete that site.
+             *
+             * CHANGELOG
+             *
+             * Added 10.02.2019
+             *
+             * @param site
+             */
             deleteSite: function (site) {
 
                 // It is not possible to delete the empty entry at the end of the list, as that is used to enter
@@ -174,6 +349,9 @@
                             this.sites.splice(i, 1);
                         }
                     }
+
+                    // Actually sending to the server to remove the site
+                    indicoSiteAjax.remove(site);
                 }
             }
         }

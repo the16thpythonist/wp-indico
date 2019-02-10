@@ -172,10 +172,9 @@ class IndicoSitePostRegistration
     public function ajaxUpdateIndicoSite() {
         $expected_args = array('name', 'key', 'url', 'categories');
         if (PostUtil::containsGETParameters($expected_args)) {
-
             $args = self::insertArgsFromGet();
-            $site_name = $_GET['name'];
-            IndicoSitePost::updateSite($site_name, $args);
+            $post_id = $_GET['ID'];
+            IndicoSitePost::updatePost($post_id, $args);
         }
         wp_die();
     }
@@ -208,12 +207,32 @@ class IndicoSitePostRegistration
      * @return array
      */
     protected static function insertArgsFromGet() {
-        // TODO: JSON parse the categories list ?
         $insert_args = array(
             'name'          => $_GET['name'],
             'key'           => $_GET['key'],
             'url'           => $_GET['url'],
-            'categories'    => $_GET['categories']
+            'categories'    => str_getcsv($_GET['categories'])
+        );
+        return $insert_args;
+    }
+
+    /**
+     * Returns an array with arguments for inserting a new indico site post, which were extracted from the _POST array,
+     * using the default key names.
+     * This method is supposed to be called during the handling of an AJAX request.
+     *
+     * CHANGELOG
+     *
+     * Added 10.02.2019
+     *
+     * @return array
+     */
+    protected static function insertArgsFromPost() {
+        $insert_args = array(
+            'name'          => $_POST['name'],
+            'key'           => $_POST['key'],
+            'url'           => $_POST['url'],
+            'categories'    => $_POST['categories']
         );
         return $insert_args;
     }

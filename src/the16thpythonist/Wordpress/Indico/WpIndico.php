@@ -38,17 +38,28 @@ class WpIndico
      * Removed all the actual registration code from this class and moved it to a separate registration class which
      * is now created and executed in this method.
      *
+     * Changed 10.02.2019
+     * Removed the functionality of hard coding and registering the observed indico sites completely.
+     * Thus also removing the $sites parameter from this method
+     *
      * @param string $post_type The string post type
-     * @param array $sites      An array specifying the indico sites to be observed
      */
-    public static function register(string $post_type, array $sites) {
+    public static function register(string $post_type) {
 
         self::$REGISTRATION = new WpIndicoRegistration($post_type);
         self::$REGISTRATION->register();
 
-        // Adding the observed indico sites to the static container
-        self::registerSites($sites);
+        // 10.02.2019
+        // The indico sites no longer need to handled
     }
+
+    // *************************************
+    // GENERAL FUNCTIONALITY FOR THE PACKAGE
+    // *************************************
+
+    // ************************
+    // DEPRECATED FUNCTIONALITY
+    // ************************
 
     /**
      * Given an array, that specifies the indico sites to be observed, this function adds them to the  KnownIndicoSites
@@ -56,7 +67,13 @@ class WpIndico
      *
      * CHANGELOG
      *
-     * Added 06.01.2018
+     * Added 06.01.2019
+     *
+     * Deprecated 10.02.2019
+     * Since the observed indico sites are no longer hard codes and stored with the "KnownIndicoSites" object, this is
+     * no longer relevant.
+     *
+     * @deprecated
      *
      * @param array $sites
      */
@@ -79,6 +96,12 @@ class WpIndico
      *
      * Added 06.01.2019
      *
+     * Deprecated 10.02.2019
+     * Since the observed indico sites are no longer hard codes and stored with the "KnownIndicoSites" object, this is
+     * no longer relevant.
+     *
+     * @deprecated
+     *
      * @param array $args
      */
     public static function registerSite(array $args) {
@@ -96,12 +119,6 @@ class WpIndico
             KnownIndicoSites::addSiteCategory($args['name'], $category_id);
         }
     }
-
-    // *************************************
-    // GENERAL FUNCTIONALITY FOR THE PACKAGE
-    // *************************************
-
-
 
 
 }

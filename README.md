@@ -42,3 +42,13 @@ background commands.
 
 - Using Vue.JS as front end library now.
 - Added the new hidden post type "indico site", which stores the info about all the observed indico sites.
+
+### 0.0.0.5 - 10.02.2019
+
+- Added tests for the "indico site" post type
+- completely reworked the way, in which observed indico sites are now stored within wordpress. The sites are no longer 
+stored in the "KnownIndicoSites" static class, but the IndicoSitePost wordpress post type
+- Added an options page for the plugin, from which new observed indico sites can be added or existing ones can be 
+modified, so that the indico sites no longer have to be hardcoded.
+- This also means the parameters for the "register" method of this plugin has changed! This has to be changed in all 
+code, that uses this package.

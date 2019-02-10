@@ -22,6 +22,16 @@ namespace the16thpythonist\Wordpress\Indico;
  *
  * This could be reprogrammed to adhere to the singleton pattern.
  *
+ * CHANGELOG
+ *
+ * Added 05.01.2019
+ *
+ * Deprecated 10.02.2019
+ * This whole class was based on the idea of hardcoding the indico sites into the init code for the plugin, but now
+ * they can be added as IndicoSitePost wordpress posts from the admin backend, making this system here obsolete.
+ *
+ * @deprecated
+ *
  * @package the16thpythonist\Wordpress\Indico
  */
 class KnownIndicoSites
@@ -38,6 +48,8 @@ class KnownIndicoSites
      * CHANGELOG
      *
      * Added 05.01.2019
+     *
+     * @deprecated
      *
      * @param string $name  A special name with which this site is to be identified
      * @param string $url   The url to the indico site
@@ -59,6 +71,8 @@ class KnownIndicoSites
      * CHANGELOG
      *
      * Added 05.01.2019
+     *
+     * @deprecated
      *
      * @param string $name
      * @param string $category_id
@@ -85,6 +99,8 @@ class KnownIndicoSites
      *
      * Added 05.01.2019
      *
+     * @deprecated
+     *
      * @param string $name  The name of the site
      * @return mixed
      */
@@ -98,6 +114,8 @@ class KnownIndicoSites
      * CHANGELOG
      *
      * Added 05.01.2019
+     *
+     * @deprecated
      *
      * @return array
      */
@@ -114,6 +132,8 @@ class KnownIndicoSites
      *
      * Added 05.01.2019
      *
+     * @deprecated
+     *
      * @return array
      */
     public static function getAllSites() {
@@ -127,6 +147,8 @@ class KnownIndicoSites
      * CHANGELOG
      *
      * Added 05.01.2019
+     *
+     * @deprecated
      *
      * @param string $name
      * @return mixed
