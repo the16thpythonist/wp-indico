@@ -53,8 +53,22 @@ class IndicoOptionsRegistration
      *
      * Added 30.01.2019
      *
+     * Changed 11.02.2019
+     * Moved the code for actually hooking in the method into a different method and only calling the
+     * this new method here.
      */
     public function register() {
+        $this->registerOptionPage();
+    }
+
+    /**
+     * Hooks in the method "addOptionPage" of the object to be called int the wordpress "admin_menu" hook
+     *
+     * CHANGELOG
+     *
+     * Added 11.02.2019
+     */
+    public function registerOptionPage() {
         add_action('admin_menu', array($this, 'addOptionPage'));
     }
 
@@ -82,7 +96,7 @@ class IndicoOptionsRegistration
     // **************************************
 
     /**
-     * Returns the actual HTML to display the options page
+     * Echos the actual HTML to display the options page
      *
      * CHANGELOG
      *

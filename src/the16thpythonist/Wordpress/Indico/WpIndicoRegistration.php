@@ -194,6 +194,10 @@ class WpIndicoRegistration
      * CHANGELOG
      *
      * Added 31.01.2019
+     *
+     * Changed 10.02.2019
+     * Now not the whole VueJS framework is included, but rather the build.js created by VUE from the main application
+     * code
      */
     public function enqueueScripts() {
         /**wp_enqueue_script(
@@ -205,7 +209,7 @@ class WpIndicoRegistration
 
         wp_enqueue_script(
             'build',
-            plugin_dir_url(__FILE__) . 'build.js',
+            plugin_dir_url(__FILE__) . 'indicowp-build.js',
             [],
             '0.0.2',
             true

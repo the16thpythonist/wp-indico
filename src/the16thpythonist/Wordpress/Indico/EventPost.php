@@ -281,7 +281,7 @@ class EventPost
         $postarr = self::createPostarr($args);
         $postarr['ID'] = $post_id;
 
-        echo wp_update_post($postarr);
+        wp_update_post($postarr);
 
         // This function will insert the values of the arguments that were mapped as taxonomies
         self::setEventTerms($post_id, $args);

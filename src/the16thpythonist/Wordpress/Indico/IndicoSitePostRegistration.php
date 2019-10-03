@@ -196,6 +196,10 @@ class IndicoSitePostRegistration
         wp_die();
     }
 
+    // **************
+    // STATIC METHODS
+    // **************
+
     /**
      * Returns an array with arguments for inserting a new indico site post, which were extracted from the _GET array,
      * using the default key names.

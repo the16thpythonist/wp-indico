@@ -1,4 +1,9 @@
 <template>
+    <!--
+    26.02.2019
+    Removed all the usage of VueBootstrap, because bootstrap is a real shit practice. Relying on "vanilla" html
+    elements
+    -->
     <div id="indico-sites-component">
         <h3>Observed indico sites</h3>
         <p>
@@ -8,18 +13,17 @@
         </p>
         <div id="indico-sites-container" v-for="site in sites">
 
-            <div class="indico-site-input" v-for="key in Object.keys(site)">
+            <div class="indico-site-input" v-for="key in Object.keys(site)" v-if="key !== 'ID'">
 
-                <b-input-group v-if="key !== 'ID'" id="indico-site-input-form" :prepend="key" size="sm">
-                    <b-form-input type="text" v-model="site[key]"></b-form-input>
-                </b-input-group>
+                <p>{{ key }}:</p>
+                <input type="text" v-model="site[key]">
 
             </div>
 
-            <b-button-group id="indico-site-buttons">
-                <b-button variant="success" @click="updateSite(site)" size="sm">update</b-button>
-                <b-button variant="danger" @click="deleteSite(site)" size="sm">delete</b-button>
-            </b-button-group>
+            <div>
+                <button @click="updateSite(site)">update</button>
+                <button @click="deleteSite(site)">delete</button>
+            </div>
 
         </div>
     </div>
@@ -270,18 +274,12 @@
 
     // Here the main vue functionality is defined
     module.exports = {
-        props: {
-            sites: {
-
-                default: function() {
-                    // The sites, which currently exist in the form of wordpress posts are passed to the front end by
-                    // the php backend through the INDICO_SITES global variable.
-                    // We will just append an additional empty site object, so that the user can enter a new indico
-                    // site into the empty input fields.
-                    let sites = INDICO_SITES;
-                    sites.push(indicoSite.getEmpty());
-                    return sites;
-                }
+        data: function () {
+            let sites = INDICO_SITES;
+            console.log(sites);
+            sites.push(indicoSite.getEmpty());
+            return {
+                sites:  sites
             }
         },
         methods: {
