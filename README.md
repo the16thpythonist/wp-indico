@@ -58,3 +58,4 @@ code, that uses this package.
 - Changed the Vue component indico-options to also show the activly observed categories now.
 - Changed the styling of the indico-option Vue component
 - Removed the "add indico site" custom meta box from the EventRegistration
+- Added the build vue JS file to the repo
