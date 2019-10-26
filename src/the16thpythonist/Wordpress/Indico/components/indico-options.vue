@@ -17,7 +17,7 @@
 
                 <p>{{ key }}:</p>
                 <input type="text" v-model="site[key]">
-
+                <p v-if="key === 'categories'">Currently selected: {{ getCategoriesString(site) }}</p>
             </div>
 
             <div>
@@ -351,6 +351,28 @@
                     // Actually sending to the server to remove the site
                     indicoSiteAjax.remove(site);
                 }
+            },
+
+            /**
+             * This function creates a string, which has all the category ids of the given site in a string, separated
+             * by comma.
+             *
+             * CHANGELOG
+             *
+             * Added 26.10.2019
+             *
+             * @param site
+             * @return {string}
+             */
+            getCategoriesString: function(site) {
+                let categories_array = [];
+                let categories = site.categories;
+                for (let property in categories) {
+                    if (categories.hasOwnProperty(property)){
+                        categories_array.push(categories[property]);
+                    }
+                }
+                return categories_array.join(',');
             }
         }
     }
