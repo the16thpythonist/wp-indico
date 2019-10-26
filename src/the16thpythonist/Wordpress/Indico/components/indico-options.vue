@@ -11,7 +11,7 @@
             The IndicoWp plugin will be able to <em>automatically</em> import all the events from the indico sites you
             have specified here! The events will only be taken from the categories with the given category ids!
         </p>
-        <div id="indico-sites-container" v-for="site in sites">
+        <div class="indico-sites-container" v-for="site in sites">
 
             <div class="indico-site-input" v-for="key in Object.keys(site)" v-if="key !== 'ID'">
 
@@ -21,8 +21,8 @@
             </div>
 
             <div>
-                <button @click="updateSite(site)">update</button>
-                <button @click="deleteSite(site)">delete</button>
+                <button class="material-button-indico" @click="updateSite(site)">update</button>
+                <button class="material-button-indico" @click="deleteSite(site)">delete</button>
             </div>
 
         </div>

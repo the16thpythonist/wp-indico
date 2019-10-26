@@ -15,6 +15,12 @@ div#event-post-fetch-metabox .hndle span {
     border-color: #3ECF8E;
 }
 
+
+/*
+GENERAL COMPONENT STYLING
+
+ */
+
 /* The execute button gets a more modern design and color */
 .material-button-indico {
     /* center the button within the container */
@@ -41,4 +47,27 @@ div#event-post-fetch-metabox .hndle span {
     border-bottom-width: 0px;
     border-top-width: 3px;
     border-top-color: rgba(0,0,0,0);
+}
+
+/*
+*****************************************************************************************
+COMPONENT: indico-options
+ */
+
+#indico-sites-component .indico-sites-container {
+    display: flex;
+    flex-direction: column;
+
+    background-color: #f7f7f7;
+
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+#indico-sites-component .indico-site-input {
+    margin-bottom: 10px;
+}
+
+#indico-sites-component .indico-site-input p {
+    margin-bottom: 2px;
 }

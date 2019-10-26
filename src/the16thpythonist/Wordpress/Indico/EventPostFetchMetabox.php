@@ -20,6 +20,11 @@ use the16thpythonist\Wordpress\Functions\PostUtil;
  *
  * Added 04.01.2019
  *
+ * Deprecated 26.11.2019
+ * It is not good practice to have a meta box inside every posts page which can be used to add new posts, it is just a
+ * little bit confusing. This should be a global action realized as a command for example.
+ *
+ * @deprecated
  * @package the16thpythonist\Wordpress\Indico
  */
 class EventPostFetchMetabox implements Metabox

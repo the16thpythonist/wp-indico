@@ -102,13 +102,14 @@ class EventPostRegistration
      * CHANGELOG
      *
      * Added 04.01.2019
+     *
+     * Changed 26.10.2019
+     * Removed the registration of the fetch meta box as it is no longer being supported.
      */
     public function registerMetaboxes() {
-        // This metabox will be used to instantly create a single new event by directly fetching it from an Indico site
-        // The actual instance of the Metabox object will be stored in an array, as it may be needed by other code
-        $fetch_metabox = new EventPostFetchMetabox();
-        $fetch_metabox->register();
-        $this->meta_boxes[] = $fetch_metabox;
+        // 26.11.2019
+        // Removed the registration of the fetch meta box, as it is no longer supported to add single event posts from
+        // inside the window of an event post
     }
 
     /**

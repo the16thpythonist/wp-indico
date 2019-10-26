@@ -52,3 +52,8 @@ stored in the "KnownIndicoSites" static class, but the IndicoSitePost wordpress 
 modified, so that the indico sites no longer have to be hardcoded.
 - This also means the parameters for the "register" method of this plugin has changed! This has to be changed in all 
 code, that uses this package.
+
+### 0.0.1 - 26.10.2019
+
+- Changed the styling of the indico-option Vue component
+- Removed the "add indico site" custom meta box from the EventRegistration
