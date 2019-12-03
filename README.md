@@ -59,3 +59,7 @@ code, that uses this package.
 - Changed the styling of the indico-option Vue component
 - Removed the "add indico site" custom meta box from the EventRegistration
 - Added the build vue JS file to the repo
+
+### 0.0.2 - 03.12.2019
+
+- Minor style changes
