@@ -63,3 +63,14 @@ code, that uses this package.
 ### 0.0.2 - 03.12.2019
 
 - Minor style changes
+
+### 0.0.3 - 10.12.2019
+
+- Modified the admin list view of the event post type:
+    - The indico ID is now being displayed. It is a link, which will redirect to the 
+    actual indico source page of that event.
+    - The creator is being displayed. It is a link which will display the list view filtered by 
+    only this creator
+    - The type is a new column. It is a link, which will display the list view filtered by 
+    events with this type only
+    - The last additional column is location. Normal string
